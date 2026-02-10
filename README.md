@@ -1,10 +1,31 @@
 # agents-config
 
-This project is a portable AGENTS configuration system for setting up AI coding agents consistently across repositories.
+This project is a portable AGENTS configuration system for setting up AI coding agents consistently across repositories with deterministic terminal commands.
 
-The setup profile is designed so a user can copy and paste one markdown file into an AI agent and have the full config applied end-to-end.
+## Primary Setup Method (Terminal-First with Bun)
 
-## Primary Setup Method (Copy-Paste to AI)
+1. Clone this repository:
+
+```bash
+git clone https://github.com/khizarahmedb/agents-config.git
+cd agents-config
+```
+
+2. Run deterministic setup:
+
+```bash
+bun run agents setup --workspace-root /path/to/workspace --repo-root /path/to/target-repo
+```
+
+3. Validate setup:
+
+```bash
+bun run agents validate
+```
+
+## Secondary Method (Copy-Paste to AI)
+
+Use this only when direct terminal execution is unavailable.
 
 1. Choose one file based on OS:
    - `setup_instructions.md` (macOS/Linux generic)
@@ -44,15 +65,23 @@ Recommended runtime profile:
 
 ## Automation Layer
 
-The project includes idempotent bootstrap scripts for faster setup in new repositories.
+The project includes a Bun CLI for cross-platform setup, plus shell/PowerShell fallbacks.
 
 Files:
+- `cli.ts` (Bun CLI, cross-platform)
+- `package.json` (Bun scripts)
 - `scripts/apply_repo_agent_policy.sh` (macOS/Linux)
 - `scripts/apply_repo_agent_policy.ps1` (Windows PowerShell)
 - `scripts/validate_setup_consistency.sh` (macOS/Linux validation)
 - `scripts/validate_setup_consistency.ps1` (Windows validation)
 
-These scripts:
+The Bun CLI:
+- `bun run agents setup --workspace-root <path> --repo-root <path>`
+- `bun run agents workspace-init --workspace-root <path>`
+- `bun run agents apply --workspace-root <path> --repo-root <path>`
+- `bun run agents validate`
+
+Legacy scripts:
 - ensure `.gitignore` contains `/docs/`, `AGENT_NOTES*.md`, `.agentsmd`
 - create repo `AGENTS.md` and `AGENT_NOTES.md` if missing
 - keep `AGENTS.md` tracked and untrack already-tracked `AGENT_NOTES*.md`/`.agentsmd` files without deleting local copies
@@ -90,6 +119,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 - `setup_instructions.md`: main setup profile for macOS/Linux
 - `setup_instructions_ubuntu.md`: Ubuntu-specific profile
 - `setup_instructions_win.md`: Windows-specific profile
+- `cli.ts`: Bun CLI for deterministic cross-platform setup
+- `package.json`: Bun scripts and CLI entry
 - `scripts/apply_repo_agent_policy.sh`: Unix bootstrap automation
 - `scripts/apply_repo_agent_policy.ps1`: Windows bootstrap automation
 - `scripts/validate_setup_consistency.sh`: Unix setup consistency checks
@@ -101,7 +132,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 
 - This repository is intended as a canonical reference for consumers.
 - Consumer environments should pull updates read-only (daily), not auto-push.
-- For deterministic updates, change `templates/` first, then setup docs/scripts, then run validation scripts before push.
+- For deterministic updates, change `templates/` first, then Bun CLI/scripts/docs, then run `bun run agents validate` before push.
 - Codex GitHub review behavior reference: https://developers.openai.com/codex/integrations/github/
 
 ## Updates
@@ -110,3 +141,4 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 - 2026-02-10 | Added idempotent bootstrap automation scripts (`.sh` + `.ps1`) and fast-path docs | Why: reduce setup drift, steps, and token usage | Commit: `1932bb0`
 - 2026-02-10 | Added behavioral adaptation loop and token-efficiency protocol to setup docs | Why: improve iterative alignment and context efficiency | Commit: `8053028`
 - 2026-02-10 | Hardened setup docs and local ignore defaults (`AGENT*.md`, `.agentsmd`) | Why: keep local agent memory private and standardized | Commit: `16754e9`
+- 2026-02-10 | Added Bun-first cross-platform CLI (`cli.ts`) and terminal-first workflow (`setup` + `validate`) | Why: remove LLM/manual variability and make setup deterministic from terminal | Commit: `TBD`

@@ -22,6 +22,16 @@ If you are the agent executing this setup, you MUST do all of the following:
 10. Report every file created/changed at the end.
 11. When user feedback indicates a repeated process miss, update repo/global notes in the same turn without waiting for another reminder.
 
+## 1.1) Required Local Clone (Deterministic)
+
+Before any setup actions, ensure the canonical repo is cloned locally:
+
+```powershell
+git clone https://github.com/khizarahmedb/agents-config.git <LOCAL_CONFIG_REPO_PATH>
+```
+
+If already cloned, do not re-clone; reuse `<LOCAL_CONFIG_REPO_PATH>`.
+
 ## 2) Inputs and Constants
 
 Set these values first:
@@ -35,18 +45,22 @@ Set these values first:
 - `GLOBAL_AGENTS_PATH`: `<WORKSPACE_ROOT>\AGENTS.md`
 - `GLOBAL_NOTES_PATH`: `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
 - `TARGET_REPO`: repository currently being configured
+- `BUN_RUNTIME`: Bun (recommended `>=1.3`)
 
 ## 2.1) Fast Path (Token-Efficient Bootstrap)
 
-Use the automation script for faster and more consistent setup:
+Use the Bun CLI for deterministic, cross-platform setup:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\apply_repo_agent_policy.ps1 `
-  -WorkspaceRoot <WORKSPACE_ROOT> `
-  -RepoRoot <TARGET_REPO>
+bun run <LOCAL_CONFIG_REPO_PATH>\cli.ts setup `
+  --workspace-root <WORKSPACE_ROOT> `
+  --repo-root <TARGET_REPO>
 ```
 
-This script renders repo files from canonical templates in `<LOCAL_CONFIG_REPO_PATH>\templates\repo`.
+This CLI renders files from canonical templates in `<LOCAL_CONFIG_REPO_PATH>\templates\`.
+
+Fallback only when Bun is unavailable:
+- `powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\apply_repo_agent_policy.ps1 ...`
 
 Then continue with daily sync + cross-tool mapping sections in this file.
 
@@ -68,7 +82,7 @@ After setup:
 5. Daily read-only sync from local clone of `agents-config` occurs once per new date.
 6. Global notes store `last_config_sync_date` and iterative process fixes.
 7. Cross-tool instruction discovery points to the same canonical global instruction source where supported.
-8. Bootstrap script exists and is idempotent for repeated runs.
+8. Bun CLI exists for cross-platform setup and is idempotent for repeated runs.
 9. Canonical templates exist in `<LOCAL_CONFIG_REPO_PATH>\templates\global` and `<LOCAL_CONFIG_REPO_PATH>\templates\repo`.
 
 ## 4) Daily Sync Routine (Run at Start of Conversation)
@@ -282,12 +296,20 @@ Use these for GitHub PR reviews (for example with `@codex review`):
 Preferred automation-first command:
 
 ```powershell
+bun run <LOCAL_CONFIG_REPO_PATH>\cli.ts apply `
+  --workspace-root <WORKSPACE_ROOT> `
+  --repo-root <REPO_ROOT>
+```
+
+Fallback command (if Bun is unavailable):
+
+```powershell
 powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\apply_repo_agent_policy.ps1 `
   -WorkspaceRoot <WORKSPACE_ROOT> `
   -RepoRoot <REPO_ROOT>
 ```
 
-Manual mode (if script is unavailable):
+Manual mode (if automation is unavailable):
 
 In each repo, ensure `.gitignore` has these exact lines (add if missing):
 
@@ -354,9 +376,9 @@ Notes:
 8. Instructions enforce compact docs index + retrieval-led reasoning.
 9. Behavioral adaptation loop is implemented and notes are updated when recurring user feedback appears.
 10. Token efficiency protocol is followed (concise by default, retrieval-on-demand).
-11. Automation script can be run repeatedly without duplicating entries or breaking tracked files.
+11. Bun CLI can be run repeatedly without duplicating entries or breaking tracked files.
 12. Template files in `<LOCAL_CONFIG_REPO_PATH>\templates\` exist and match intended policy.
-13. `powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\validate_setup_consistency.ps1` passes.
+13. `bun run <LOCAL_CONFIG_REPO_PATH>\cli.ts validate` passes.
 
 ## 10) Final Output Format (for the executing AI)
 
@@ -387,6 +409,9 @@ This setup incorporates the following validated patterns:
 - [OpenAI Codex guide: AGENTS.md](https://developers.openai.com/codex/guides/agents-md/)
 - [OpenAI Codex GitHub integration](https://developers.openai.com/codex/integrations/github/)
 - [OpenAI Codex config: project instructions discovery](https://developers.openai.com/codex/config-advanced/#project-instructions-discovery)
+- [Bun LLM full docs](https://bun.sh/llms-full.txt)
+- [Bun README](https://github.com/oven-sh/bun/blob/main/README.md)
+- [Bun CLAUDE.md](https://github.com/oven-sh/bun/blob/main/CLAUDE.md)
 - [Vercel evals: AGENTS.md outperforms skills](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals)
 - [Vercel: We removed 80% of our agent's tools](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools)
 - [Anthropic Claude Code memory hierarchy](https://code.claude.com/docs/en/memory)

@@ -1,0 +1,20 @@
+# Repo Agent Instructions
+
+1. At the start of every conversation in this repository, read `AGENT_NOTES.md` before proposing or writing changes.
+2. If `skills.md` exists, review it and use relevant skills/workflows for the task.
+3. Prefer retrieval-led reasoning over pre-training-led reasoning for framework/version-sensitive tasks.
+4. Explore project structure before retrieving external docs; then fetch only the minimum docs needed.
+5. Keep instructions compact; point to retrievable files rather than embedding full documentation in AGENTS.
+6. When a new stable preference appears, append it to `AGENT_NOTES.md` with a date and short rationale.
+7. Keep notes concise and behavioral; do not store secrets, passwords, API tokens, or personal data.
+8. If a note conflicts with an explicit user request in the current conversation, follow the explicit request and then update notes accordingly.
+9. When repo-level notes are insufficient, consult `{{WORKSPACE_ROOT}}/AGENT_NOTES_GLOBAL.md`.
+10. Do not copy global notes into local notes unless explicitly requested; reference them instead.
+
+## Review guidelines
+
+Use these for GitHub PR reviews (for example with `@codex review`):
+- Prioritize correctness, security, and regression risk over style-only feedback.
+- Include concrete, reproducible impact and keep each finding actionable.
+- Call out missing tests when behavior changes are not validated.
+- Prefer short, high-signal comments with clear file/line targeting.

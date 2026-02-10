@@ -1,0 +1,4 @@
+# Agent Notes
+
+- {{DATE}}: Repository bootstrapped with standard local AGENTS policy. Rationale: ensure deterministic agent behavior from first task.
+- Reference: Shared/global preferences live in `{{WORKSPACE_ROOT}}/AGENT_NOTES_GLOBAL.md`.

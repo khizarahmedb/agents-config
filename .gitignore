@@ -1,0 +1,4 @@
+# Local agent notes/scratch files (keep local, do not track remotely)
+/docs/
+AGENT_NOTES*.md
+.agentsmd

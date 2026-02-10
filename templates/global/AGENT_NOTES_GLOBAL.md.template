@@ -1,0 +1,10 @@
+# Global Agent Notes
+
+- {{DATE}}: If a repo lacks `AGENTS.md`, bootstrap `AGENTS.md` + `AGENT_NOTES.md` before major edits. Rationale: enforce stable repo-specific agent behavior.
+- {{DATE}}: Keep notes concise, behavioral, and free of secrets. Rationale: notes are persistent memory and should remain safe.
+- {{DATE}}: Prefer nearest-local instructions over broader scope and respect `AGENTS.override.md` precedence where supported. Rationale: deterministic behavior.
+- {{DATE}}: Default across repos is to keep `AGENTS.md` tracked and gitignore/untrack only `AGENT_NOTES*.md` and `.agentsmd` (and local-only `/docs/` where needed). Rationale: enable Codex review guidance while keeping local memory private.
+- {{DATE}}: For framework/version-sensitive tasks, prefer docs-index + retrieval-led reasoning. Rationale: reduce context bloat and improve correctness.
+- {{DATE}}: When user flags a repeated process miss, codify it in notes and apply in the same turn. Rationale: iterative self-correction.
+- {{DATE}}: Canonical policy updates must modify `{{WORKSPACE_ROOT}}/agents-config/templates/` first, then setup docs/scripts, then add an entry under `README.md` `## Updates`. Rationale: keep distributed instructions synchronized.
+- {{DATE}}: `last_config_sync_date: YYYY-MM-DD`. Rationale: track once-per-day read-only canonical refresh.

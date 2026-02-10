@@ -95,6 +95,7 @@ Create `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md` with:
 
 ## Step 3: Per-repo behavior
 For each repository:
+- If this is a newly created repository/directory, create `AGENTS.md` and `AGENT_NOTES.md` before adding other project artifacts.
 - If `AGENTS.md` exists, follow it.
 - If missing, create:
   - `AGENTS.md`
@@ -241,6 +242,16 @@ After setup, verify:
    - `%USERPROFILE%\.copilot\copilot-instructions.md`
 4. `%USERPROFILE%\.gemini\settings.json` includes `AGENTS.md`.
 
+## Step 8: Documentation sync rule
+When you update any instruction or notes behavior (global or repo-level), also:
+
+1. Update this documentation repo files:
+   - `setup_instructions.md`
+   - `setup_instructions_win.md`
+   - `setup_instructions_ubuntu.md`
+2. Commit the changes.
+3. Push to `main` in `https://github.com/khizarahmedb/agents-config` in the same turn when feasible.
+
 ## Operational rules for any AI using this system
 - Always check repo-local `AGENTS.md` first.
 - Read repo `AGENT_NOTES.md` before proposing major work.
@@ -276,6 +287,7 @@ Requirements:
    {"context":{"fileName":["AGENTS.md","GEMINI.md"]}}
 7) Keep notes concise, dated, behavioral, no secrets.
 8) Do not include clasp-specific instructions.
+9) If instructions/notes are changed, sync all setup docs (`setup_instructions.md`, `setup_instructions_win.md`, `setup_instructions_ubuntu.md`) and push `main` to https://github.com/khizarahmedb/agents-config in the same turn when feasible.
 
 Return a verification summary with created/updated files and final precedence behavior.
 ```

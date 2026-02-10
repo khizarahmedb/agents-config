@@ -1,39 +1,55 @@
-# Setup Instructions (Windows): Portable AGENTS/Notes Standard
+# Setup Instructions (Windows): Portable AGENTS + Notes Standard
 
 ## Purpose
-Use this file to bootstrap the same agent-instruction system across Windows machines and repository workspaces.
+Use this file to bootstrap a portable instruction system for AI coding agents across Windows repositories and tools.
 
-This standard defines:
-- One canonical global `AGENTS.md`
-- One canonical global notes file
-- Per-repo `AGENTS.md` + `AGENT_NOTES.md`
-- Deterministic precedence and bootstrap behavior
-- Cross-tool compatibility mappings
+This setup is intentionally generic and not tied to Apps Script or clasp.
 
-This document is intentionally not clasp-specific.
+## Core Principles
+- Use `AGENTS.md` as the canonical instruction file format.
+- Keep global and repo instructions separate.
+- Keep `agents-config` as a read-only reference for consumers.
+- Refresh remote guidance once per day, not every turn.
+- Keep context compact: use docs index + retrieval, not full docs in prompt context.
+- Use `skills.md` as a repo-local capability index when needed.
 
-## What this setup creates
-
-### Canonical files
+## Canonical Files
 - Global instruction file: `<WORKSPACE_ROOT>\AGENTS.md`
 - Global notes file: `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
 - Repo instruction file: `<repo_root>\AGENTS.md`
 - Repo notes file: `<repo_root>\AGENT_NOTES.md`
+- Optional repo skills index: `<repo_root>\skills.md`
 
-### Precedence
-1. Explicit user request in current conversation
-2. Repo-local `AGENTS.md`
-3. Global `AGENTS.md`
+## Instruction Precedence
+1. Explicit user request in current conversation.
+2. Nearest `AGENTS.override.md` to working directory.
+3. Nearest `AGENTS.md` to working directory.
+4. Parent-directory `AGENTS.override.md`/`AGENTS.md` up to repo root.
+5. Global tool-home file (`%USERPROFILE%\.codex\AGENTS.override.md` then `%USERPROFILE%\.codex\AGENTS.md`, when supported).
+6. Workspace-global fallback guidance.
 
-## Step 1: Choose workspace root
-Pick a directory containing multiple repositories.
+If a tool does not support `AGENTS.override.md`, use: explicit user request > repo `AGENTS.md` > global `AGENTS.md`.
 
-Recommended example on Windows:
+## Step 1: Choose Workspace Root
+Pick a directory that contains multiple repositories.
+
+Recommended Windows example:
 - `C:\Users\<USERNAME>\Documents\GitHub`
 
-In this doc, this is `<WORKSPACE_ROOT>`.
+In this document, that path is `<WORKSPACE_ROOT>`.
 
-## Step 2: Create global instruction files
+## Step 2: Daily Remote Reference Refresh (Read-Only)
+At the start of each conversation:
+
+1. Read local date:
+   - `(Get-Date).ToString("yyyy-MM-dd")`
+2. Read `last_config_sync_date` from `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
+3. If date changed, refresh local clone of canonical reference:
+   - `git -C <LOCAL_AGENTS_CONFIG_PATH> pull --ff-only`
+4. Update `last_config_sync_date` in `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
+5. Do not push updates to `https://github.com/khizarahmedb/agents-config` unless explicitly requested by the owner.
+
+## Step 3: Create Global Files
 Create `<WORKSPACE_ROOT>\AGENTS.md` with:
 
 ```md
@@ -43,43 +59,29 @@ Create `<WORKSPACE_ROOT>\AGENTS.md` with:
 These instructions apply to repositories under `<WORKSPACE_ROOT>`.
 
 ## Standard
-- Canonical global instruction file: `<WORKSPACE_ROOT>\AGENTS.md`
-- Canonical global notes file: `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
-- Canonical repo instruction file: `<repo_root>\AGENTS.md`
-- Canonical repo notes file: `<repo_root>\AGENT_NOTES.md`
-- Precedence order: explicit user request > repo-local instructions > global instructions
+- Canonical global instruction file: `<WORKSPACE_ROOT>/AGENTS.md`
+- Canonical global notes file: `<WORKSPACE_ROOT>/AGENT_NOTES_GLOBAL.md`
+- Canonical repo instruction file: `<repo_root>/AGENTS.md`
+- Canonical repo notes file: `<repo_root>/AGENT_NOTES.md`
+- Optional repo skills index: `<repo_root>/skills.md`
 
-## Bootstrap Behavior
-1. Determine repository root.
-2. If `<repo_root>\AGENTS.md` exists, follow it and treat global file as fallback only.
-3. If `<repo_root>\AGENTS.md` does not exist, create:
-   - `<repo_root>\AGENTS.md`
-   - `<repo_root>\AGENT_NOTES.md`
-4. Continue by following repo-local `AGENTS.md`.
+## Precedence
+1. Explicit user request in current conversation.
+2. Nearest `AGENTS.override.md`.
+3. Nearest `AGENTS.md`.
+4. Parent AGENTS files up to repo root.
+5. Global AGENTS in tool home.
 
-## Local File Templates (when missing)
-Create `<repo_root>\AGENTS.md` with:
+## Bootstrap
+1. Determine repo root.
+2. If `<repo_root>/AGENTS.md` exists, follow it.
+3. If missing, create `<repo_root>/AGENTS.md` and `<repo_root>/AGENT_NOTES.md`.
+4. If repository has reusable workflows, create `<repo_root>/skills.md`.
 
-1. At the start of every conversation in this repository, read `AGENT_NOTES.md` before proposing or writing changes.
-2. Use `AGENT_NOTES.md` as preference memory for communication style, delivery format, and reporting conventions.
-3. When a new stable preference appears, append it to `AGENT_NOTES.md` with a date and short rationale.
-4. Keep notes concise and behavioral; do not store secrets, passwords, API tokens, or personal data.
-5. If a note conflicts with an explicit user request in the current conversation, follow the current explicit request and then update notes accordingly.
-6. If multiple tasks are provided, prioritize the oldest requested task first and then newer tasks; if the user explicitly marks a task as urgent, complete that urgent task first and then automatically continue the remaining tasks in original order.
-7. When repo-level notes are insufficient, consult `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
-8. Do not copy global notes into local notes unless explicitly requested; reference them instead.
-
-Create `<repo_root>\AGENT_NOTES.md` with:
-
-# Agent Notes
-
-- YYYY-MM-DD: <repo-specific preference>. Rationale: <why it should persist>.
-- Reference: Shared/global preferences live in `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
-
-## Global Notes Policy
-- Global user preferences belong in `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
-- Repo notes should contain only repository-specific behavior/preferences.
-- Prefer references to global notes over duplication.
+## Working Style
+- Prefer retrieval-led reasoning over pre-training-led reasoning for framework/version-sensitive tasks.
+- Explore project structure first, then retrieve only the docs needed.
+- Keep instructions compact; prefer doc indexes pointing to retrievable files.
 ```
 
 Create `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md` with:
@@ -89,22 +91,79 @@ Create `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md` with:
 
 - YYYY-MM-DD: If a repo lacks `AGENTS.md`, bootstrap `AGENTS.md` + `AGENT_NOTES.md` before major edits. Rationale: enforce stable repo-specific behavior.
 - YYYY-MM-DD: Keep notes concise, behavioral, and free of secrets. Rationale: notes are persistent memory and should remain safe.
-- YYYY-MM-DD: Prefer README/build/test checks early when modernizing repos. Rationale: reduce incorrect assumptions.
 - YYYY-MM-DD: For multi-task requests, execute oldest requested task first unless user marks urgency. Rationale: deterministic priority order.
+- YYYY-MM-DD: Prefer nearest-local `AGENTS.override.md`/`AGENTS.md` over broader rules. Rationale: deterministic instruction layering.
+- YYYY-MM-DD: Use compact docs index + retrieval for framework docs. Rationale: lower context bloat with high reliability.
+- YYYY-MM-DD: `last_config_sync_date: YYYY-MM-DD`. Rationale: track once-per-day reference refresh.
 ```
 
-## Step 3: Per-repo behavior
+## Step 4: Per-Repo Bootstrap
 For each repository:
-- If this is a newly created repository/directory, create `AGENTS.md` and `AGENT_NOTES.md` before adding other project artifacts.
-- If `AGENTS.md` exists, follow it.
-- If missing, create:
-  - `AGENTS.md`
-  - `AGENT_NOTES.md`
-- Keep repo notes repo-specific.
-- Reference global notes when needed.
 
-## Step 4: Git ignore policy
-In each repo where local/ephemeral agent artifacts should be untracked, add:
+1. If this is a newly created repository/directory, create `AGENTS.md` and `AGENT_NOTES.md` before adding other artifacts.
+2. If `AGENTS.md` exists, follow it.
+3. If `AGENTS.md` does not exist, create:
+   - `AGENTS.md`
+   - `AGENT_NOTES.md`
+4. If repo has reusable workflows/skills, create `skills.md`.
+5. Keep repo notes repo-specific.
+6. Reference global notes instead of copying them.
+
+Recommended repo `AGENTS.md` starter:
+
+```md
+# Repo Agent Instructions
+
+1. Read `AGENT_NOTES.md` before proposing or writing changes.
+2. If `skills.md` exists, use relevant skills/workflows.
+3. Prefer retrieval-led reasoning for framework/version-sensitive tasks.
+4. Explore project structure first, then retrieve docs as needed.
+5. Keep instructions compact and behavioral.
+6. Append stable repo preferences to `AGENT_NOTES.md` with date + rationale.
+7. Never store secrets in notes.
+8. If repo notes are insufficient, consult global notes.
+```
+
+Recommended repo `AGENT_NOTES.md` starter:
+
+```md
+# Agent Notes
+
+- YYYY-MM-DD: <repo-specific preference>. Rationale: <why it should persist>.
+- Reference: Shared/global preferences live in `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
+```
+
+Recommended repo `skills.md` starter:
+
+```md
+# Skills Index
+
+- <skill-name>: <when to use>
+- <skill-name>: <when to use>
+```
+
+## Step 5: Compact Docs Index Pattern
+For framework-heavy projects, do not paste full docs into `AGENTS.md`.
+
+Do this instead:
+1. Store retrievable docs in repo files/folders (example: `.next-docs/`).
+2. Add a compact index in `AGENTS.md` that maps topics to paths.
+3. Instruct agent to retrieve docs on demand.
+
+Example compact index line:
+
+```text
+[Docs Index]|root: ./.next-docs|IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning|routing:{defining-routes.mdx,parallel-routes.mdx}|cache:{use-cache.mdx,cache-tag.mdx}
+```
+
+Practical recommendations:
+- Compress aggressively.
+- Prefer index + retrieval over full inline docs.
+- Use evals for APIs not likely in model training data.
+- Structure docs for fast file-level retrieval.
+
+## Step 6: Git Ignore Policy
+In each repo where local/ephemeral artifacts should be untracked, add:
 
 ```gitignore
 # Local docs
@@ -115,10 +174,10 @@ AGENT*.md
 ```
 
 Notes:
-- `AGENT*.md` ignores `AGENTS.md`, `AGENT_NOTES.md`, and similar local agent markdown files.
+- `AGENT*.md` ignores `AGENTS.md`, `AGENT_NOTES.md`, and similar files.
 - If you want repo `AGENTS.md` tracked, do not use this pattern.
 
-## Step 5: Cross-tool global compatibility (machine level)
+## Step 7: Cross-Tool Global Compatibility
 Map tool-specific global files to `<WORKSPACE_ROOT>\AGENTS.md`.
 
 Recommended links:
@@ -138,8 +197,8 @@ Gemini settings (`%USERPROFILE%\.gemini\settings.json`):
 }
 ```
 
-## Step 6: Bootstrap script (PowerShell, optional)
-Create and run this once per machine (replace `<WORKSPACE_ROOT>`):
+## Step 8: Bootstrap Script (PowerShell, Optional)
+Create and run once per machine (replace `<WORKSPACE_ROOT>`):
 
 ```powershell
 $Canonical = "<WORKSPACE_ROOT>\\AGENTS.md"
@@ -224,9 +283,9 @@ if (-not (Test-Path $GeminiSettings)) {
 
 Notes:
 - Symlink creation on Windows may require Developer Mode or elevated rights.
-- Script falls back to copying the canonical file if symlink creation fails.
+- Script falls back to copying if symlink creation fails.
 
-## Step 7: Verification checklist
+## Step 9: Verification Checklist
 After setup, verify:
 
 1. Global files exist:
@@ -235,32 +294,16 @@ After setup, verify:
 2. In a target repo:
    - `AGENTS.md` exists (or was bootstrapped)
    - `AGENT_NOTES.md` exists
-3. Machine mappings/files:
+3. If needed, `skills.md` exists with repo workflows.
+4. Machine mappings exist:
    - `%USERPROFILE%\.codex\AGENTS.md`
    - `%USERPROFILE%\.claude\CLAUDE.md`
    - `%USERPROFILE%\.gemini\AGENTS.md`
    - `%USERPROFILE%\.copilot\copilot-instructions.md`
-4. `%USERPROFILE%\.gemini\settings.json` includes `AGENTS.md`.
+5. `%USERPROFILE%\.gemini\settings.json` includes `AGENTS.md`.
+6. On a new day, daily refresh pulls remote reference and updates `last_config_sync_date`.
 
-## Step 8: Documentation sync rule
-When you update any instruction or notes behavior (global or repo-level), also:
-
-1. Update this documentation repo files:
-   - `setup_instructions.md`
-   - `setup_instructions_win.md`
-   - `setup_instructions_ubuntu.md`
-2. Commit the changes.
-3. Push to `main` in `https://github.com/khizarahmedb/agents-config` in the same turn when feasible.
-
-## Operational rules for any AI using this system
-- Always check repo-local `AGENTS.md` first.
-- Read repo `AGENT_NOTES.md` before proposing major work.
-- Append stable behavioral preferences with date + rationale.
-- Never store secrets in notes.
-- Keep notes concise.
-- Use global notes as reference, not copy-paste duplication.
-
-## Handoff prompt (paste to another AI)
+## Handoff Prompt (Paste to Another AI)
 
 ```text
 Implement the AGENTS standard in this machine/workspace.
@@ -272,26 +315,30 @@ Requirements:
 2) Ensure per-repo bootstrap behavior:
    - If repo AGENTS.md exists, follow it
    - If missing, create AGENTS.md + AGENT_NOTES.md
+   - Create skills.md when reusable workflows are needed
 3) Use precedence:
-   explicit user request > repo AGENTS.md > global AGENTS.md
+   explicit user request > nearest AGENTS.override.md > nearest AGENTS.md > parent AGENTS files > global AGENTS
 4) Add repo .gitignore rules where requested:
    /docs/
    AGENT*.md
-5) Configure cross-tool global compatibility by wiring these paths to <WORKSPACE_ROOT>\\AGENTS.md:
-   %USERPROFILE%\\.codex\\AGENTS.md
-   %USERPROFILE%\\.claude\\CLAUDE.md
-   %USERPROFILE%\\.gemini\\AGENTS.md
-   %USERPROFILE%\\.gemini\\GEMINI.md
-   %USERPROFILE%\\.copilot\\copilot-instructions.md
-6) Ensure %USERPROFILE%\\.gemini\\settings.json includes:
+5) Configure cross-tool global compatibility by wiring these paths to <WORKSPACE_ROOT>\AGENTS.md:
+   %USERPROFILE%\.codex\AGENTS.md
+   %USERPROFILE%\.claude\CLAUDE.md
+   %USERPROFILE%\.gemini\AGENTS.md
+   %USERPROFILE%\.gemini\GEMINI.md
+   %USERPROFILE%\.copilot\copilot-instructions.md
+6) Ensure %USERPROFILE%\.gemini\settings.json includes:
    {"context":{"fileName":["AGENTS.md","GEMINI.md"]}}
 7) Keep notes concise, dated, behavioral, no secrets.
 8) Do not include clasp-specific instructions.
-9) If instructions/notes are changed, sync all setup docs (`setup_instructions.md`, `setup_instructions_win.md`, `setup_instructions_ubuntu.md`) and push `main` to https://github.com/khizarahmedb/agents-config in the same turn when feasible.
+9) Use compact docs index + retrieval pattern for framework docs.
+10) On first conversation of each new local date, pull local clone of https://github.com/khizarahmedb/agents-config with `git pull --ff-only` and update `last_config_sync_date`.
+11) Treat that remote repository as read-only reference. Never mention auto-updating or auto-pushing it.
 
 Return a verification summary with created/updated files and final precedence behavior.
 ```
 
 ## Notes
 - This standard is intentionally portable and minimal.
-- If a tool has native rule systems, those can coexist; this standard still uses `AGENTS.md` as canonical shared policy.
+- If a tool has native rule systems, those can coexist with `AGENTS.md`.
+- Consumers read remote `agents-config`; owner-controlled updates happen separately.

@@ -248,6 +248,19 @@ Gemini example (`~/.gemini/settings.json`):
 }
 ```
 
+### Optional Codex Advanced Discovery Tuning
+
+If your repos use alternate instruction filenames, add them in `~/.codex/config.toml`:
+
+```toml
+project_doc_fallback_filenames = ["TEAM_GUIDE.md", ".agents.md"]
+project_doc_max_bytes = 65536
+```
+
+Notes:
+- `project_doc_fallback_filenames` lets Codex treat alternate files as instruction sources.
+- `project_doc_max_bytes` raises the combined AGENTS read budget beyond the 32 KiB default.
+
 ## 9) QA Checklist (Must Pass)
 
 1. Global files exist and are non-empty.

@@ -9,6 +9,31 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoAgentsTemplate = Join-Path $scriptDir "..\templates\repo\AGENTS.md.template"
+$repoNotesTemplate = Join-Path $scriptDir "..\templates\repo\AGENT_NOTES.md.template"
+
+foreach ($template in @($repoAgentsTemplate, $repoNotesTemplate)) {
+  if (-not (Test-Path -LiteralPath $template)) {
+    throw "Missing required template: $template"
+  }
+}
+
+function Render-Template {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$TemplatePath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$OutputPath
+  )
+
+  $content = Get-Content -LiteralPath $TemplatePath -Raw
+  $content = $content.Replace("{{WORKSPACE_ROOT}}", $WorkspaceRoot)
+  $content = $content.Replace("{{DATE}}", (Get-Date -Format "yyyy-MM-dd"))
+  Set-Content -LiteralPath $OutputPath -Encoding UTF8 -Value $content
+}
+
 if (-not (Test-Path -LiteralPath $RepoRoot)) {
   New-Item -ItemType Directory -Path $RepoRoot -Force | Out-Null
 }
@@ -20,7 +45,7 @@ if (-not (Test-Path -LiteralPath $gitignore)) {
 
 $requiredLines = @(
   "/docs/",
-  "AGENT*.md",
+  "AGENT_NOTES*.md",
   ".agentsmd"
 )
 
@@ -37,28 +62,12 @@ foreach ($line in $requiredLines) {
 
 $agentsPath = Join-Path $RepoRoot "AGENTS.md"
 if (-not (Test-Path -LiteralPath $agentsPath)) {
-@"
-# Repo Agent Instructions
-
-1. At conversation start, read AGENT_NOTES.md before proposing or writing changes.
-2. If skills.md exists, use relevant skills/workflows.
-3. Prefer retrieval-led reasoning over pre-training-led reasoning for framework/version-sensitive tasks.
-4. Keep instructions compact and fetch detailed docs on demand.
-5. Append stable repo preferences to AGENT_NOTES.md with date and rationale.
-6. Never store secrets in notes.
-7. If repo notes are insufficient, consult $WorkspaceRoot/AGENT_NOTES_GLOBAL.md.
-8. Reference global notes instead of duplicating them in this repo.
-"@ | Set-Content -LiteralPath $agentsPath -Encoding UTF8
+  Render-Template -TemplatePath $repoAgentsTemplate -OutputPath $agentsPath
 }
 
 $notesPath = Join-Path $RepoRoot "AGENT_NOTES.md"
 if (-not (Test-Path -LiteralPath $notesPath)) {
-@"
-# Agent Notes
-
-- $(Get-Date -Format "yyyy-MM-dd"): Repository bootstrapped with standard local AGENTS policy. Rationale: ensure deterministic agent behavior from first task.
-- Reference: Shared/global preferences live in $WorkspaceRoot/AGENT_NOTES_GLOBAL.md.
-"@ | Set-Content -LiteralPath $notesPath -Encoding UTF8
+  Render-Template -TemplatePath $repoNotesTemplate -OutputPath $notesPath
 }
 
 $insideGit = $false
@@ -72,13 +81,13 @@ try {
 }
 
 if ($insideGit) {
-  $tracked = git -C $RepoRoot ls-files -- 'AGENT*.md' '.agentsmd'
+  $tracked = git -C $RepoRoot ls-files -- 'AGENT_NOTES*.md' '**/AGENT_NOTES*.md' '.agentsmd' '**/.agentsmd'
   foreach ($file in $tracked) {
     git -C $RepoRoot rm --cached --ignore-unmatch -- "$file" | Out-Null
   }
 }
 
 Write-Host "Applied policy to: $RepoRoot"
-Write-Host "- ensured .gitignore: /docs/, AGENT*.md, .agentsmd"
+Write-Host "- ensured .gitignore: /docs/, AGENT_NOTES*.md, .agentsmd"
 Write-Host "- ensured AGENTS.md and AGENT_NOTES.md exist"
-Write-Host "- untracked AGENT*.md/.agentsmd where previously tracked"
+Write-Host "- untracked AGENT_NOTES*.md/.agentsmd where previously tracked"

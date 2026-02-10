@@ -25,15 +25,22 @@ Recommended runtime profile:
 - Workspace-level canonical files:
   - `AGENTS.md`
   - `AGENT_NOTES_GLOBAL.md`
+- Canonical template sources (committed in this repo):
+  - `templates/global/AGENTS.md.template`
+  - `templates/global/AGENT_NOTES_GLOBAL.md.template`
+  - `templates/repo/AGENTS.md.template`
+  - `templates/repo/AGENT_NOTES.md.template`
 - Repo-level bootstrap behavior:
   - create `AGENTS.md` + `AGENT_NOTES.md` when missing
   - preserve existing repo AGENTS instructions when present
-- Default local-only policy:
-  - `.gitignore` includes `/docs/`, `AGENT*.md`, `.agentsmd`
-  - agent notes/instructions are untracked unless explicitly requested otherwise
+- Default tracking policy:
+  - `AGENTS.md` stays tracked in each repository for Codex review guidance
+  - `.gitignore` includes `/docs/`, `AGENT_NOTES*.md`, `.agentsmd`
+  - tracked local notes (`AGENT_NOTES*.md`, `.agentsmd`) are untracked unless explicitly requested otherwise
 - Daily read-only sync from this repository on first conversation of a new date
 - Compact docs-index + retrieval-led workflow to reduce token/context bloat
 - Explicit behavioral adaptation loop (feedback -> note update -> immediate application)
+- Repo `AGENTS.md` template includes mandatory `## Review guidelines` for `@codex review`
 
 ## Automation Layer
 
@@ -42,11 +49,13 @@ The project includes idempotent bootstrap scripts for faster setup in new reposi
 Files:
 - `scripts/apply_repo_agent_policy.sh` (macOS/Linux)
 - `scripts/apply_repo_agent_policy.ps1` (Windows PowerShell)
+- `scripts/validate_setup_consistency.sh` (macOS/Linux validation)
+- `scripts/validate_setup_consistency.ps1` (Windows validation)
 
 These scripts:
-- ensure `.gitignore` contains `/docs/`, `AGENT*.md`, `.agentsmd`
+- ensure `.gitignore` contains `/docs/`, `AGENT_NOTES*.md`, `.agentsmd`
 - create repo `AGENTS.md` and `AGENT_NOTES.md` if missing
-- untrack already-tracked `AGENT*.md`/`.agentsmd` files without deleting local copies
+- keep `AGENTS.md` tracked and untrack already-tracked `AGENT_NOTES*.md`/`.agentsmd` files without deleting local copies
 
 macOS/Linux usage:
 
@@ -64,6 +73,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\apply_repo_agent_policy.ps1 \
   -RepoRoot C:\path\to\repo
 ```
 
+Deterministic validation (macOS/Linux):
+
+```bash
+bash ./scripts/validate_setup_consistency.sh
+```
+
+Deterministic validation (Windows):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps1
+```
+
 ## File Map
 
 - `setup_instructions.md`: main setup profile for macOS/Linux
@@ -71,12 +92,17 @@ powershell -ExecutionPolicy Bypass -File .\scripts\apply_repo_agent_policy.ps1 \
 - `setup_instructions_win.md`: Windows-specific profile
 - `scripts/apply_repo_agent_policy.sh`: Unix bootstrap automation
 - `scripts/apply_repo_agent_policy.ps1`: Windows bootstrap automation
+- `scripts/validate_setup_consistency.sh`: Unix setup consistency checks
+- `scripts/validate_setup_consistency.ps1`: Windows setup consistency checks
+- `templates/global/`: canonical global AGENTS/notes templates
+- `templates/repo/`: canonical repo AGENTS/notes templates
 
 ## Operational Notes
 
 - This repository is intended as a canonical reference for consumers.
 - Consumer environments should pull updates read-only (daily), not auto-push.
-- If your policy changes, update setup instruction files first, then scripts if needed.
+- For deterministic updates, change `templates/` first, then setup docs/scripts, then run validation scripts before push.
+- Codex GitHub review behavior reference: https://developers.openai.com/codex/integrations/github/
 
 ## Updates
 

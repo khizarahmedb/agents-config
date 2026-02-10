@@ -8,14 +8,17 @@ Usage:
 
 Description:
   Idempotently applies local AGENTS policy to a repository:
-  - Ensures .gitignore contains /docs/, AGENT*.md, .agentsmd
+  - Ensures .gitignore contains /docs/, AGENT_NOTES*.md, .agentsmd
   - Creates AGENTS.md and AGENT_NOTES.md if missing
-  - Untracks already-tracked AGENT*.md/.agentsmd files
+  - Untracks already-tracked AGENT_NOTES*.md/.agentsmd files
 USAGE
 }
 
 WORKSPACE_ROOT=""
 REPO_ROOT=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_REPO_AGENTS="$SCRIPT_DIR/../templates/repo/AGENTS.md.template"
+TEMPLATE_REPO_NOTES="$SCRIPT_DIR/../templates/repo/AGENT_NOTES.md.template"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -45,6 +48,13 @@ if [[ -z "$WORKSPACE_ROOT" || -z "$REPO_ROOT" ]]; then
   exit 1
 fi
 
+for template in "$TEMPLATE_REPO_AGENTS" "$TEMPLATE_REPO_NOTES"; do
+  if [[ ! -f "$template" ]]; then
+    echo "Missing required template: $template" >&2
+    exit 1
+  fi
+done
+
 mkdir -p "$REPO_ROOT"
 
 GITIGNORE="$REPO_ROOT/.gitignore"
@@ -58,40 +68,43 @@ ensure_line() {
 }
 
 ensure_line "/docs/"
-ensure_line "AGENT*.md"
+ensure_line "AGENT_NOTES*.md"
 ensure_line ".agentsmd"
 
-if [[ ! -f "$REPO_ROOT/AGENTS.md" ]]; then
-  cat > "$REPO_ROOT/AGENTS.md" <<TEMPLATE
-# Repo Agent Instructions
+escape_sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[\/&]/\\&/g'
+}
 
-1. At conversation start, read AGENT_NOTES.md before proposing or writing changes.
-2. If skills.md exists, use relevant skills/workflows.
-3. Prefer retrieval-led reasoning over pre-training-led reasoning for framework/version-sensitive tasks.
-4. Keep instructions compact and fetch detailed docs on demand.
-5. Append stable repo preferences to AGENT_NOTES.md with date and rationale.
-6. Never store secrets in notes.
-7. If repo notes are insufficient, consult $WORKSPACE_ROOT/AGENT_NOTES_GLOBAL.md.
-8. Reference global notes instead of duplicating them in this repo.
-TEMPLATE
+render_template() {
+  local template="$1"
+  local output="$2"
+  local escaped_workspace_root
+  local escaped_date
+
+  escaped_workspace_root="$(escape_sed_replacement "$WORKSPACE_ROOT")"
+  escaped_date="$(escape_sed_replacement "$(date +%F)")"
+
+  sed \
+    -e "s/{{WORKSPACE_ROOT}}/${escaped_workspace_root}/g" \
+    -e "s/{{DATE}}/${escaped_date}/g" \
+    "$template" > "$output"
+}
+
+if [[ ! -f "$REPO_ROOT/AGENTS.md" ]]; then
+  render_template "$TEMPLATE_REPO_AGENTS" "$REPO_ROOT/AGENTS.md"
 fi
 
 if [[ ! -f "$REPO_ROOT/AGENT_NOTES.md" ]]; then
-  cat > "$REPO_ROOT/AGENT_NOTES.md" <<TEMPLATE
-# Agent Notes
-
-- $(date +%F): Repository bootstrapped with standard local AGENTS policy. Rationale: ensure deterministic agent behavior from first task.
-- Reference: Shared/global preferences live in $WORKSPACE_ROOT/AGENT_NOTES_GLOBAL.md.
-TEMPLATE
+  render_template "$TEMPLATE_REPO_NOTES" "$REPO_ROOT/AGENT_NOTES.md"
 fi
 
 if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   while IFS= read -r -d '' tracked_file; do
     git -C "$REPO_ROOT" rm --cached --ignore-unmatch -- "$tracked_file" >/dev/null 2>&1 || true
-  done < <(git -C "$REPO_ROOT" ls-files -z -- 'AGENT*.md' '.agentsmd')
+  done < <(git -C "$REPO_ROOT" ls-files -z -- 'AGENT_NOTES*.md' '**/AGENT_NOTES*.md' '.agentsmd' '**/.agentsmd')
 fi
 
 echo "Applied policy to: $REPO_ROOT"
-echo "- ensured .gitignore: /docs/, AGENT*.md, .agentsmd"
+echo "- ensured .gitignore: /docs/, AGENT_NOTES*.md, .agentsmd"
 echo "- ensured AGENTS.md and AGENT_NOTES.md exist"
-echo "- untracked AGENT*.md/.agentsmd where previously tracked"
+echo "- untracked AGENT_NOTES*.md/.agentsmd where previously tracked"

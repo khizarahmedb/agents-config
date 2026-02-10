@@ -14,7 +14,7 @@ If you are the agent executing this setup, you MUST do all of the following:
 2. Implement exactly this configuration model.
 3. Preserve existing repo-specific AGENTS instructions when they already exist.
 4. Use global instructions only as fallback when repo-level instructions exist.
-5. Keep `AGENTS.md` and `AGENT_NOTES*.md` local/untracked by default.
+5. Keep `AGENTS.md` tracked for repository-level Codex review guidance, and keep `AGENT_NOTES*.md` local/untracked by default.
 6. Use read-only daily sync from the canonical instructions repo.
 7. Never auto-push updates to the canonical instructions repo.
 8. Update notes with dated, concise, behavioral entries.
@@ -30,6 +30,8 @@ Set these values first:
   - Windows example: `C:\Users\<username>\Documents\GitHub`
 - `CANONICAL_CONFIG_REPO_URL`: `https://github.com/khizarahmedb/agents-config`
 - `LOCAL_CONFIG_REPO_PATH`: `<WORKSPACE_ROOT>\agents-config`
+- `GLOBAL_TEMPLATE_DIR`: `<LOCAL_CONFIG_REPO_PATH>\templates\global`
+- `REPO_TEMPLATE_DIR`: `<LOCAL_CONFIG_REPO_PATH>\templates\repo`
 - `GLOBAL_AGENTS_PATH`: `<WORKSPACE_ROOT>\AGENTS.md`
 - `GLOBAL_NOTES_PATH`: `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
 - `TARGET_REPO`: repository currently being configured
@@ -43,6 +45,8 @@ powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\apply_
   -WorkspaceRoot <WORKSPACE_ROOT> `
   -RepoRoot <TARGET_REPO>
 ```
+
+This script renders repo files from canonical templates in `<LOCAL_CONFIG_REPO_PATH>\templates\repo`.
 
 Then continue with daily sync + cross-tool mapping sections in this file.
 
@@ -58,13 +62,14 @@ After setup:
    - If missing, create `<repo>\AGENTS.md` and `<repo>\AGENT_NOTES.md`.
 3. Git ignore defaults are enforced per repo:
    - `/docs/`
-   - `AGENT*.md`
+   - `AGENT_NOTES*.md`
    - `.agentsmd`
-4. Tracked agent markdown files are untracked by default unless user explicitly asks otherwise.
+4. Tracked local note files (`AGENT_NOTES*.md`, `.agentsmd`) are untracked by default, while `AGENTS.md` remains tracked.
 5. Daily read-only sync from local clone of `agents-config` occurs once per new date.
 6. Global notes store `last_config_sync_date` and iterative process fixes.
 7. Cross-tool instruction discovery points to the same canonical global instruction source where supported.
 8. Bootstrap script exists and is idempotent for repeated runs.
+9. Canonical templates exist in `<LOCAL_CONFIG_REPO_PATH>\templates\global` and `<LOCAL_CONFIG_REPO_PATH>\templates\repo`.
 
 ## 4) Daily Sync Routine (Run at Start of Conversation)
 
@@ -124,9 +129,15 @@ Escalate to verbose mode only for:
 
 ## 5) Create / Update Global Files
 
+Canonical source of truth:
+- `<LOCAL_CONFIG_REPO_PATH>\templates\global\AGENTS.md.template`
+- `<LOCAL_CONFIG_REPO_PATH>\templates\global\AGENT_NOTES_GLOBAL.md.template`
+
+When policy changes, update template files first, then keep this document in sync.
+
 ### 5.1 `<WORKSPACE_ROOT>\AGENTS.md`
 
-If missing, create using this template. If present, patch to match behavior below.
+If missing, render from `<LOCAL_CONFIG_REPO_PATH>\templates\global\AGENTS.md.template` and replace placeholders (`{{WORKSPACE_ROOT}}`, `{{DATE}}`). If present, patch to match behavior below.
 
 ```md
 # Global Agent Instructions (Workspace)
@@ -164,10 +175,10 @@ If repo-local `AGENTS.md` exists, treat it as primary and this file as fallback.
 ## Default Git Ignore + Untracking Policy (All Repos)
 1. Ensure `.gitignore` includes:
    - `/docs/`
-   - `AGENT*.md`
+   - `AGENT_NOTES*.md`
    - `.agentsmd`
-2. Untrack any already-tracked agent markdown files without deleting local copies.
-3. Do not push agent markdown files unless user explicitly requests tracking.
+2. Keep `AGENTS.md` tracked so Codex can apply repository review guidance.
+3. Untrack already-tracked local notes (`AGENT_NOTES*.md`, `.agentsmd`) without deleting local copies.
 4. Keep this policy as default across repos unless user explicitly changes it.
 
 ## Daily Canonical Reference Sync
@@ -195,7 +206,7 @@ When the user calls out a process miss:
 
 ### 5.2 `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
 
-If missing, create using this starter. If present, keep existing notes and ensure required keys exist.
+If missing, render from `<LOCAL_CONFIG_REPO_PATH>\templates\global\AGENT_NOTES_GLOBAL.md.template` and replace placeholders (`{{WORKSPACE_ROOT}}`, `{{DATE}}`). If present, keep existing notes and ensure required keys exist.
 
 ```md
 # Global Agent Notes
@@ -203,7 +214,7 @@ If missing, create using this starter. If present, keep existing notes and ensur
 - YYYY-MM-DD: If a repo lacks `AGENTS.md`, bootstrap `AGENTS.md` + `AGENT_NOTES.md` before major edits. Rationale: enforce stable repo-specific behavior.
 - YYYY-MM-DD: Keep notes concise, behavioral, and free of secrets. Rationale: persistent memory must stay safe.
 - YYYY-MM-DD: Prefer nearest-local instructions over broader scope; use `AGENTS.override.md` precedence where supported. Rationale: deterministic layering.
-- YYYY-MM-DD: Default policy is to gitignore and untrack `AGENT*.md` files unless user explicitly asks to track them. Rationale: local memory should remain local.
+- YYYY-MM-DD: Default policy is to keep `AGENTS.md` tracked and gitignore/untrack only `AGENT_NOTES*.md` and `.agentsmd`. Rationale: support Codex review guidance while keeping local memory local.
 - YYYY-MM-DD: For framework/version-sensitive work, use compact docs index + retrieval-led reasoning. Rationale: lower context bloat and improve correctness.
 - YYYY-MM-DD: When user flags a repeated miss, codify it as a dated global note immediately. Rationale: iterative self-correction.
 - YYYY-MM-DD: `last_config_sync_date: YYYY-MM-DD`. Rationale: once-per-day read-only canonical sync tracking.
@@ -239,6 +250,13 @@ Run these steps for each target repo.
 7. Never store secrets in notes.
 8. If repo notes are insufficient, consult `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
 9. Reference global notes; do not duplicate them in this file.
+
+## Review guidelines
+
+Use these for GitHub PR reviews (for example with `@codex review`):
+- Prioritize correctness, security, and regression risk over style-only feedback.
+- Keep findings actionable with concrete impact and line-specific context.
+- Call out missing tests for behavior changes.
 ```
 
 ### 6.2 Repo `AGENT_NOTES.md` template
@@ -275,14 +293,14 @@ In each repo, ensure `.gitignore` has these exact lines (add if missing):
 
 ```gitignore
 /docs/
-AGENT*.md
+AGENT_NOTES*.md
 .agentsmd
 ```
 
 Then untrack matching files if already tracked:
 
 ```powershell
-$tracked = git ls-files -- 'AGENT*.md' '.agentsmd'
+$tracked = git ls-files -- 'AGENT_NOTES*.md' '**/AGENT_NOTES*.md' '.agentsmd' '**/.agentsmd'
 if ($tracked) {
   $tracked | ForEach-Object { git rm --cached --ignore-unmatch -- $_ }
 }
@@ -290,7 +308,8 @@ if ($tracked) {
 
 Important:
 - This keeps local files on disk.
-- Do not commit agent markdown files unless explicitly requested by the user.
+- Keep `AGENTS.md` committed so Codex can use repo review guidance.
+- Keep `AGENT_NOTES*.md` local unless explicitly requested otherwise.
 
 ## 8) Cross-Tool Global Compatibility
 
@@ -328,14 +347,16 @@ Notes:
 1. Global files exist and are non-empty.
 2. Daily sync logic is documented and operational.
 3. Repo bootstrap behavior is deterministic (create-if-missing, preserve-if-present).
-4. `.gitignore` includes `/docs/`, `AGENT*.md`, `.agentsmd`.
-5. Tracked agent markdown files are untracked by default.
+4. `.gitignore` includes `/docs/`, `AGENT_NOTES*.md`, `.agentsmd`.
+5. Tracked local note files (`AGENT_NOTES*.md`, `.agentsmd`) are untracked by default while `AGENTS.md` remains tracked.
 6. Repo notes reference global notes instead of duplicating them.
 7. Instructions enforce read-only consumption of canonical remote config unless owner explicitly asks for edits.
 8. Instructions enforce compact docs index + retrieval-led reasoning.
 9. Behavioral adaptation loop is implemented and notes are updated when recurring user feedback appears.
 10. Token efficiency protocol is followed (concise by default, retrieval-on-demand).
 11. Automation script can be run repeatedly without duplicating entries or breaking tracked files.
+12. Template files in `<LOCAL_CONFIG_REPO_PATH>\templates\` exist and match intended policy.
+13. `powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\validate_setup_consistency.ps1` passes.
 
 ## 10) Final Output Format (for the executing AI)
 
@@ -364,6 +385,7 @@ This setup incorporates the following validated patterns:
 - [AGENTS.md standard](https://agents.md/)
 - [agentsmd/agents.md repository](https://github.com/agentsmd/agents.md)
 - [OpenAI Codex guide: AGENTS.md](https://developers.openai.com/codex/guides/agents-md/)
+- [OpenAI Codex GitHub integration](https://developers.openai.com/codex/integrations/github/)
 - [OpenAI Codex config: project instructions discovery](https://developers.openai.com/codex/config-advanced/#project-instructions-discovery)
 - [Vercel evals: AGENTS.md outperforms skills](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals)
 - [Vercel: We removed 80% of our agent's tools](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools)

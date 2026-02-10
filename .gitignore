@@ -1,4 +1,4 @@
-# Local agent guidance (keep local, do not track remotely)
+# Local agent notes/scratch files (keep local, do not track remotely)
 /docs/
-AGENT*.md
+AGENT_NOTES*.md
 .agentsmd

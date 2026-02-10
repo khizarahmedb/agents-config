@@ -1,0 +1,4 @@
+# Local agent guidance (keep local, do not track remotely)
+/docs/
+AGENT*.md
+.agentsmd

@@ -32,11 +32,21 @@ Notes:
 }
 
 function parseArgs(argv: string[]): { command: string; flags: FlagMap } {
-  const command = argv[0] ?? "";
+  let command = "";
   const flags: FlagMap = {};
+  let argStart = 0;
 
-  for (let i = 1; i < argv.length; i += 1) {
+  if (argv[0] && !argv[0].startsWith("-")) {
+    command = argv[0];
+    argStart = 1;
+  }
+
+  for (let i = argStart; i < argv.length; i += 1) {
     const token = argv[i];
+    if (token === "--help" || token === "-h") {
+      flags.help = true;
+      continue;
+    }
     if (!token.startsWith("--")) {
       continue;
     }
@@ -209,6 +219,10 @@ function validateSetupConsistency(): void {
     "README.md",
     "cli.ts",
     "package.json",
+    path.join("scripts", "apply_repo_agent_policy.sh"),
+    path.join("scripts", "apply_repo_agent_policy.ps1"),
+    path.join("scripts", "validate_setup_consistency.sh"),
+    path.join("scripts", "validate_setup_consistency.ps1"),
     path.join("templates", "global", "AGENTS.md.template"),
     path.join("templates", "global", "AGENT_NOTES_GLOBAL.md.template"),
     path.join("templates", "repo", "AGENTS.md.template"),

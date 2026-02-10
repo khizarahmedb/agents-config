@@ -77,3 +77,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\apply_repo_agent_policy.ps1 \
 - This repository is intended as a canonical reference for consumers.
 - Consumer environments should pull updates read-only (daily), not auto-push.
 - If your policy changes, update setup instruction files first, then scripts if needed.
+
+## Version Control Notes (Concise)
+
+Update rule:
+- For every commit that changes functionality or setup behavior, append one line here.
+- Format: `YYYY-MM-DD | <short change summary> | Why: <reason> | Commit: <hash>`
+
+Entries:
+- 2026-02-10 | Added copy-paste-first setup guidance and runtime profile recommendations | Why: make onboarding deterministic across agent harnesses | Commit: `5259ef9`
+- 2026-02-10 | Added idempotent bootstrap automation scripts (`.sh` + `.ps1`) and fast-path docs | Why: reduce setup drift, steps, and token usage | Commit: `1932bb0`
+- 2026-02-10 | Added behavioral adaptation loop and token-efficiency protocol to setup docs | Why: improve iterative alignment and context efficiency | Commit: `8053028`
+- 2026-02-10 | Hardened setup docs and local ignore defaults (`AGENT*.md`, `.agentsmd`) | Why: keep local agent memory private and standardized | Commit: `16754e9`

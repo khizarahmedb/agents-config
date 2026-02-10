@@ -34,6 +34,18 @@ Set these values first:
 - `GLOBAL_NOTES_PATH`: `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
 - `TARGET_REPO`: repository currently being configured
 
+## 2.1) Fast Path (Token-Efficient Bootstrap)
+
+Use the automation script for faster and more consistent setup:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\apply_repo_agent_policy.ps1 `
+  -WorkspaceRoot <WORKSPACE_ROOT> `
+  -RepoRoot <TARGET_REPO>
+```
+
+Then continue with daily sync + cross-tool mapping sections in this file.
+
 ## 3) Required End State
 
 After setup:
@@ -52,6 +64,7 @@ After setup:
 5. Daily read-only sync from local clone of `agents-config` occurs once per new date.
 6. Global notes store `last_config_sync_date` and iterative process fixes.
 7. Cross-tool instruction discovery points to the same canonical global instruction source where supported.
+8. Bootstrap script exists and is idempotent for repeated runs.
 
 ## 4) Daily Sync Routine (Run at Start of Conversation)
 
@@ -248,6 +261,16 @@ Run these steps for each target repo.
 
 ## 7) Git Ignore + Untracking Commands (Windows PowerShell)
 
+Preferred automation-first command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File <LOCAL_CONFIG_REPO_PATH>\scripts\apply_repo_agent_policy.ps1 `
+  -WorkspaceRoot <WORKSPACE_ROOT> `
+  -RepoRoot <REPO_ROOT>
+```
+
+Manual mode (if script is unavailable):
+
 In each repo, ensure `.gitignore` has these exact lines (add if missing):
 
 ```gitignore
@@ -312,6 +335,7 @@ Notes:
 8. Instructions enforce compact docs index + retrieval-led reasoning.
 9. Behavioral adaptation loop is implemented and notes are updated when recurring user feedback appears.
 10. Token efficiency protocol is followed (concise by default, retrieval-on-demand).
+11. Automation script can be run repeatedly without duplicating entries or breaking tracked files.
 
 ## 10) Final Output Format (for the executing AI)
 
@@ -332,6 +356,7 @@ This setup incorporates the following validated patterns:
 - Practical preference for compact docs index + retrieval-led reasoning.
 - Behavioral adaptation through explicit memory loops improves future interactions.
 - Simpler toolchains can reduce steps/tokens and improve reliability when documentation quality is high.
+- Idempotent bootstrap automation reduces repetitive edits and lowers operator/agent variance.
 - Explicit command-first, boundary-first instruction style for reliability.
 
 ## 12) Sources

@@ -20,6 +20,7 @@ If you are the agent executing this setup, you MUST do all of the following:
 8. Update notes with dated, concise, behavioral entries.
 9. Prefer compact docs indexes and retrieval-led reasoning.
 10. Report every file created/changed at the end.
+11. When user feedback indicates a repeated process miss, update repo/global notes in the same turn without waiting for another reminder.
 
 ## 2) Inputs and Constants
 
@@ -72,6 +73,41 @@ git -C <LOCAL_CONFIG_REPO_PATH> pull --ff-only
 
 4. Update `last_config_sync_date` in global notes.
 5. Treat `agents-config` as read-only reference unless the owner explicitly asks to modify it.
+
+## 4.1) Behavioral Adaptation Loop (Required)
+
+For each conversation, run this loop:
+
+1. Detect user signal types:
+   - Correction (`this is wrong`, `you missed X`)
+   - Repetition (`I should not have to remind you`)
+   - Preference (`be concise`, `be more detailed`, `do X first`)
+   - Priority/urgency (`now`, `first`, `blocker`)
+2. Convert stable signals into durable rules:
+   - Repo-specific rule -> append to `<repo_root>/AGENT_NOTES.md`
+   - Cross-repo rule -> append to `<WORKSPACE_ROOT>/AGENT_NOTES_GLOBAL.md`
+3. Apply the rule immediately in the same turn.
+4. In completion summary, confirm which rule was added or updated.
+
+This implements an explicit observe -> codify -> apply -> verify loop.
+
+## 4.2) Token Efficiency Protocol (Required)
+
+Default behavior:
+
+1. Keep routine progress updates to 1-2 sentences.
+2. Prefer concise outputs by default; expand only when user requests detail.
+3. Use retrieval-on-demand:
+   - Read indexes first.
+   - Load only files required for the active task.
+4. Prefer fewer tools and fewer steps when equivalent quality is possible.
+5. Summarize command output instead of pasting large raw logs.
+6. Avoid redundant restatement of known context.
+
+Escalate to verbose mode only for:
+- Safety-critical tasks
+- Architecture decisions with tradeoffs
+- Explicit user request for full detail
 
 ## 5) Create / Update Global Files
 
@@ -274,6 +310,8 @@ Notes:
 6. Repo notes reference global notes instead of duplicating them.
 7. Instructions enforce read-only consumption of canonical remote config unless owner explicitly asks for edits.
 8. Instructions enforce compact docs index + retrieval-led reasoning.
+9. Behavioral adaptation loop is implemented and notes are updated when recurring user feedback appears.
+10. Token efficiency protocol is followed (concise by default, retrieval-on-demand).
 
 ## 10) Final Output Format (for the executing AI)
 
@@ -292,6 +330,8 @@ This setup incorporates the following validated patterns:
 - `AGENTS.md` as an open, tool-agnostic instruction standard with nearest-file precedence.
 - Codex instruction-chain behavior (global + project hierarchy, fallback filenames, byte limits).
 - Practical preference for compact docs index + retrieval-led reasoning.
+- Behavioral adaptation through explicit memory loops improves future interactions.
+- Simpler toolchains can reduce steps/tokens and improve reliability when documentation quality is high.
 - Explicit command-first, boundary-first instruction style for reliability.
 
 ## 12) Sources
@@ -301,6 +341,11 @@ This setup incorporates the following validated patterns:
 - [OpenAI Codex guide: AGENTS.md](https://developers.openai.com/codex/guides/agents-md/)
 - [OpenAI Codex config: project instructions discovery](https://developers.openai.com/codex/config-advanced/#project-instructions-discovery)
 - [Vercel evals: AGENTS.md outperforms skills](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals)
+- [Vercel: We removed 80% of our agent's tools](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools)
 - [Anthropic Claude Code memory hierarchy](https://code.claude.com/docs/en/memory)
 - [GitHub changelog: Copilot coding agent supports AGENTS.md](https://github.blog/changelog/2025-08-28-copilot-coding-agent-now-supports-agents-md-custom-instructions/)
 - [Gemini CLI context configuration](https://geminicli.com/docs/cli/configuration/)
+- [Apple ML: Feedback effect in IA interaction](https://machinelearning.apple.com/research/feedback-effect)
+- [Self-Refine (arXiv)](https://arxiv.org/abs/2303.17651)
+- [Reflexion (arXiv)](https://arxiv.org/abs/2303.11366)
+- [Personalized LM from Personalized Human Feedback (arXiv)](https://arxiv.org/abs/2402.05133)

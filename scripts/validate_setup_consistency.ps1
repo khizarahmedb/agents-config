@@ -24,16 +24,7 @@ foreach ($rel in $requiredFiles) {
   }
 }
 
-$requiredTokens = @(
-  "AGENT_NOTES*.md",
-  ".agentsmd",
-  "/docs/",
-  "last_config_sync_date",
-  "last_global_config_review_date",
-  "last_global_config_review_repo",
-  "read-only",
-  "Review guidelines"
-)
+$requiredTokens = @("AGENT_NOTES*.md", ".agentsmd", "/docs/", "last_config_sync_date", "read-only")
 $docs = @(
   (Join-Path $root "setup_instructions.md"),
   (Join-Path $root "setup_instructions_ubuntu.md"),

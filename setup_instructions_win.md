@@ -201,18 +201,6 @@ If repo-local `AGENTS.md` exists, treat it as primary and this file as fallback.
 2. Update `last_config_sync_date` in `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`.
 3. Treat `agents-config` as read-only unless owner explicitly asks for updates.
 
-## Automatic Global Config Maintenance
-1. At conversation start, review:
-   - `<WORKSPACE_ROOT>\AGENTS.md`
-   - `<WORKSPACE_ROOT>\AGENT_NOTES_GLOBAL.md`
-2. If a stable behavior/process preference is identified, update both files in the same turn.
-3. Keep these state keys in global notes:
-   - `last_config_sync_date`
-   - `last_global_config_review_date`
-   - `last_global_config_review_repo`
-4. Refresh `last_global_config_review_date` and `last_global_config_review_repo` at each conversation start.
-5. If drift or a stable new preference is detected mid-conversation, update both global files in the same turn.
-
 ## Docs Strategy
 - Keep instruction payload compact.
 - Use docs index + retrieval over embedding full docs.
@@ -237,20 +225,12 @@ If missing, render from `<LOCAL_CONFIG_REPO_PATH>\templates\global\AGENT_NOTES_G
 ```md
 # Global Agent Notes
 
-## Auto-Maintenance State
-- `last_config_sync_date: YYYY-MM-DD`
-- `last_global_config_review_date: YYYY-MM-DD`
-- `last_global_config_review_repo: <workspace/repo-path>`
-- `last_global_config_review_trigger: conversation_start|mid_conversation_update`
-
 - YYYY-MM-DD: If a repo lacks `AGENTS.md`, bootstrap `AGENTS.md` + `AGENT_NOTES.md` before major edits. Rationale: enforce stable repo-specific behavior.
 - YYYY-MM-DD: Keep notes concise, behavioral, and free of secrets. Rationale: persistent memory must stay safe.
 - YYYY-MM-DD: Prefer nearest-local instructions over broader scope; use `AGENTS.override.md` precedence where supported. Rationale: deterministic layering.
 - YYYY-MM-DD: Default policy is to keep `AGENTS.md` tracked and gitignore/untrack only `AGENT_NOTES*.md` and `.agentsmd`. Rationale: support Codex review guidance while keeping local memory local.
 - YYYY-MM-DD: For framework/version-sensitive work, use compact docs index + retrieval-led reasoning. Rationale: lower context bloat and improve correctness.
 - YYYY-MM-DD: When user flags a repeated miss, codify it as a dated global note immediately. Rationale: iterative self-correction.
-- YYYY-MM-DD: At each conversation start, review both global files and refresh review-state keys. Rationale: prevent policy drift and stale state.
-- YYYY-MM-DD: If drift/new stable preference is detected mid-conversation, update both global files in the same turn. Rationale: immediate correction.
 - YYYY-MM-DD: `last_config_sync_date: YYYY-MM-DD`. Rationale: once-per-day read-only canonical sync tracking.
 ```
 

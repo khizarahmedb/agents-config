@@ -30,7 +30,10 @@ required_tokens=(
   ".agentsmd"
   "/docs/"
   "last_config_sync_date"
+  "last_global_config_review_date"
+  "last_global_config_review_repo"
   "read-only"
+  "Review guidelines"
 )
 
 for doc in "$ROOT_DIR/setup_instructions.md" "$ROOT_DIR/setup_instructions_ubuntu.md" "$ROOT_DIR/setup_instructions_win.md"; do

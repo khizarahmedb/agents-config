@@ -52,6 +52,24 @@ If an agent/tool does not support `AGENTS.override.md`, use: explicit user reque
 4. Update `last_config_sync_date` in `{{WORKSPACE_ROOT}}/AGENT_NOTES_GLOBAL.md`.
 5. Treat `agents-config` as a read-only reference unless the owner explicitly asks for updates.
 
+## Automatic Global Config Maintenance
+1. At the start of each conversation, review both:
+   - `{{WORKSPACE_ROOT}}/AGENTS.md`
+   - `{{WORKSPACE_ROOT}}/AGENT_NOTES_GLOBAL.md`
+2. If a stable behavior/process preference is identified, update both in the same turn:
+   - Add/refine durable policy text in `AGENTS.md`.
+   - Append a dated rationale note in `AGENT_NOTES_GLOBAL.md`.
+3. Maintain these state keys in `AGENT_NOTES_GLOBAL.md`:
+   - `last_config_sync_date`
+   - `last_global_config_review_date`
+   - `last_global_config_review_repo`
+4. Refresh `last_global_config_review_date` and `last_global_config_review_repo` at each conversation start.
+5. Keep updates concise and behavioral; never store secrets, passwords, API tokens, or personal data.
+6. When drift or a stable new preference is detected mid-conversation, update global config in the same turn.
+7. Mid-conversation global updates must modify both files together:
+   - Policy/instruction delta in `AGENTS.md`.
+   - Dated rationale note and refreshed review state in `AGENT_NOTES_GLOBAL.md`.
+
 ## Local File Templates (When Missing)
 Create `<repo_root>/AGENTS.md` with:
 

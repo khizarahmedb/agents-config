@@ -238,7 +238,16 @@ function validateSetupConsistency(): void {
     path.join(ROOT_DIR, "setup_instructions_ubuntu.md"),
     path.join(ROOT_DIR, "setup_instructions_win.md"),
   ];
-  const requiredTokens = ["AGENT_NOTES*.md", ".agentsmd", "/docs/", "last_config_sync_date", "read-only", "Review guidelines"];
+  const requiredTokens = [
+    "AGENT_NOTES*.md",
+    ".agentsmd",
+    "/docs/",
+    "last_config_sync_date",
+    "last_global_config_review_date",
+    "last_global_config_review_repo",
+    "read-only",
+    "Review guidelines",
+  ];
   for (const docPath of docs) {
     const content = readFileSync(docPath, "utf8");
     for (const token of requiredTokens) {

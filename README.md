@@ -6,7 +6,7 @@ The setup profile is designed so a user can copy and paste one markdown file int
 
 Canonical term mapping:
 - `the brain` = this maintained config system:
-  - local: `/Users/khizar/Documents/GitHub/agents-config`
+  - local: `<WORKSPACE_ROOT>/agents-config` (or the current repo root)
   - remote: `https://github.com/khizarahmedb/agents-config`
 
 ## Primary Setup Method (Copy-Paste to AI)

@@ -25,16 +25,16 @@ Canonical term mapping:
 
 ```bash
 bash ./scripts/obsidian_index_refresh.sh \
-  --repo-root /Users/khizar/Documents/GitHub/agents-config \
-  --vault /Users/khizar/Documents/GitHub
+  --repo-root . \
+  --vault <WORKSPACE_ROOT>
 ```
 
 2. Query ranked context:
 
 ```bash
 bash ./scripts/obsidian_fast_context.sh \
-  --repo-root /Users/khizar/Documents/GitHub/agents-config \
-  --vault /Users/khizar/Documents/GitHub \
+  --repo-root . \
+  --vault <WORKSPACE_ROOT> \
   --query "last_config_sync_date" \
   --engine hybrid \
   --refresh auto \
@@ -45,8 +45,8 @@ bash ./scripts/obsidian_fast_context.sh \
 
 ```bash
 bash ./scripts/obsidian_fast_context.sh \
-  --repo-root /Users/khizar/Documents/GitHub/agents-config \
-  --vault /Users/khizar/Documents/GitHub \
+  --repo-root . \
+  --vault <WORKSPACE_ROOT> \
   --query "setup instructions" \
   --engine auto \
   --mode paths
@@ -58,7 +58,7 @@ bash ./scripts/obsidian_fast_context.sh \
 
 ```bash
 bash ./scripts/obsidian_fast_context.sh \
-  --vault /Users/khizar/Documents/GitHub \
+  --vault <WORKSPACE_ROOT> \
   --query "Review guidelines" \
   --engine base \
   --mode json
@@ -90,8 +90,8 @@ Run repeatable local benchmark:
 
 ```bash
 bash ./scripts/benchmark_obsidian_fast_context.sh \
-  --repo-root /Users/khizar/Documents/GitHub/agents-config \
-  --vault /Users/khizar/Documents/GitHub \
+  --repo-root . \
+  --vault <WORKSPACE_ROOT> \
   --engine auto \
   --refresh auto \
   --runs 7

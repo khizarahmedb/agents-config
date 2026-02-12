@@ -4,6 +4,11 @@ This project is a portable AGENTS configuration system for setting up AI coding 
 
 The setup profile is designed so a user can copy and paste one markdown file into an AI agent and have the full config applied end-to-end.
 
+Canonical term mapping:
+- `the brain` = this maintained config system:
+  - local: `/Users/khizar/Documents/GitHub/agents-config`
+  - remote: `https://github.com/khizarahmedb/agents-config`
+
 ## Primary Setup Method (Copy-Paste to AI)
 
 1. Choose one file based on OS:
@@ -85,6 +90,45 @@ Deterministic validation (Windows):
 powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps1
 ```
 
+## Obsidian-First Retrieval (Primary Path)
+
+Obsidian-first retrieval is the default operating path for this repository.
+
+Legacy markdown-only retrieval flow is deprecated.
+
+Requirements:
+- Obsidian CLI available in your environment (see `help.obsidian.md/cli`)
+- Vault root set to your workspace root (for example `/Users/<username>/Documents/GitHub`)
+
+Fast workflow:
+1. Refresh incremental index (`obsidian_index_refresh.sh`).
+2. Query ranked context (`obsidian_fast_context.sh`) with `--engine hybrid`.
+3. Use `--mode paths` to minimize tokens, then load only selected files.
+
+Files:
+- `scripts/obsidian_index_refresh.sh`: builds/updates incremental SQLite FTS index
+- `scripts/obsidian_fast_context.sh`: hybrid query engine (`auto|hybrid|base|fts|rg`)
+- `scripts/benchmark_obsidian_fast_context.sh`: repeatable p50/p95 benchmark runner
+- `obsidian/agents-config-index.base`: Base views optimized for this repository
+- `obsidian/agents-config-flow.canvas`: visual map of retrieval flow
+- `obsidian/obsidian-cli-playbook.md`: quickstart, troubleshooting, and benchmark cookbook
+
+Examples:
+
+```bash
+bash ./scripts/obsidian_index_refresh.sh \
+  --vault /Users/<username>/Documents/GitHub
+```
+
+```bash
+bash ./scripts/obsidian_fast_context.sh \
+  --vault /Users/<username>/Documents/GitHub \
+  --query "last_config_sync_date" \
+  --engine hybrid \
+  --refresh auto \
+  --mode paths
+```
+
 ## File Map
 
 - `setup_instructions.md`: main setup profile for macOS/Linux
@@ -94,6 +138,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 - `scripts/apply_repo_agent_policy.ps1`: Windows bootstrap automation
 - `scripts/validate_setup_consistency.sh`: Unix setup consistency checks
 - `scripts/validate_setup_consistency.ps1`: Windows setup consistency checks
+- `scripts/obsidian_index_refresh.sh`: incremental SQLite index builder for hybrid retrieval
+- `scripts/obsidian_fast_context.sh`: Obsidian CLI retrieval helper for low-token lookups
+- `scripts/benchmark_obsidian_fast_context.sh`: repeatable latency benchmark for retrieval pipeline
+- `obsidian/agents-config-index.base`: Obsidian Base for high-signal file views
+- `obsidian/agents-config-flow.canvas`: JSON Canvas map of retrieval flow
+- `obsidian/obsidian-cli-playbook.md`: Obsidian CLI usage notes for this repo
 - `templates/global/`: canonical global AGENTS/notes templates
 - `templates/repo/`: canonical repo AGENTS/notes templates
 
@@ -106,6 +156,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 
 ## Updates
 
+- 2026-02-13 | Promoted Obsidian-first retrieval to primary path; deprecated markdown-only retrieval; added hybrid scripts (`obsidian_index_refresh.sh`, `obsidian_fast_context.sh`, `benchmark_obsidian_fast_context.sh`) and playbook | Why: fastest startup, deterministic lookup, and lower token usage for repeated setup operations | Commit: `pending`
 - 2026-02-10 | Added copy-paste-first setup guidance and runtime profile recommendations | Why: make onboarding deterministic across agent harnesses | Commit: `5259ef9`
 - 2026-02-10 | Added idempotent bootstrap automation scripts (`.sh` + `.ps1`) and fast-path docs | Why: reduce setup drift, steps, and token usage | Commit: `1932bb0`
 - 2026-02-10 | Added behavioral adaptation loop and token-efficiency protocol to setup docs | Why: improve iterative alignment and context efficiency | Commit: `8053028`

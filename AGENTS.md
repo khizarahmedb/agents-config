@@ -11,6 +11,14 @@
 9. When repo-level notes are insufficient, consult `/Users/khizar/Documents/GitHub/AGENT_NOTES_GLOBAL.md`.
 10. Do not copy global notes into local notes unless explicitly requested; reference them instead.
 11. Only the owner updates canonical remote instructions; all other agents consume and follow them.
+12. For every new conversation in this repository, run Obsidian-first retrieval before reading broad repo context:
+    - `bash ./scripts/obsidian_fast_context.sh --query "<task>" --engine hybrid --refresh auto --mode paths --vault /Users/khizar/Documents/GitHub`
+13. Legacy markdown-only retrieval flow is deprecated; do not default to full manual scan of setup markdown files.
+14. If the Obsidian-first path is unavailable for this repository, treat it as a blocker and report it immediately.
+15. Canonical term mapping: when the user says `the brain`, interpret it as this maintained config system:
+    - Remote canonical repo: `https://github.com/khizarahmedb/agents-config`
+    - Local canonical repo: `/Users/khizar/Documents/GitHub/agents-config`
+    - Primary retrieval surface: Obsidian assets and scripts under `obsidian/` and `scripts/` in this repo.
 
 ## Review guidelines
 

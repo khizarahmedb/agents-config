@@ -10,6 +10,12 @@ $requiredFiles = @(
   "setup_instructions_win.md",
   "scripts\apply_repo_agent_policy.sh",
   "scripts\apply_repo_agent_policy.ps1",
+  "scripts\obsidian_index_refresh.sh",
+  "scripts\obsidian_fast_context.sh",
+  "scripts\benchmark_obsidian_fast_context.sh",
+  "obsidian\agents-config-index.base",
+  "obsidian\agents-config-flow.canvas",
+  "obsidian\obsidian-cli-playbook.md",
   "templates\global\AGENTS.md.template",
   "templates\global\AGENT_NOTES_GLOBAL.md.template",
   "templates\repo\AGENTS.md.template",
@@ -24,6 +30,19 @@ foreach ($rel in $requiredFiles) {
   }
 }
 
+$brainRequiredFiles = @(
+  (Join-Path $root "AGENTS.md"),
+  (Join-Path $root "templates\global\AGENTS.md.template"),
+  (Join-Path $root "templates\repo\AGENTS.md.template"),
+  (Join-Path $root "obsidian\obsidian-cli-playbook.md")
+)
+foreach ($file in $brainRequiredFiles) {
+  $content = Get-Content -LiteralPath $file -Raw
+  if ($content -notlike "*the brain*") {
+    throw "Missing canonical 'the brain' mapping in $file"
+  }
+}
+
 $requiredTokens = @(
   "AGENT_NOTES*.md",
   ".agentsmd",
@@ -32,7 +51,12 @@ $requiredTokens = @(
   "last_global_config_review_date",
   "last_global_config_review_repo",
   "read-only",
-  "Review guidelines"
+  "Review guidelines",
+  "Obsidian CLI",
+  "obsidian_fast_context.sh",
+  "obsidian_index_refresh.sh",
+  "deprecated",
+  "the brain"
 )
 $docs = @(
   (Join-Path $root "setup_instructions.md"),

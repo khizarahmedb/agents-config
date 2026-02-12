@@ -9,6 +9,12 @@ required_files=(
   "$ROOT_DIR/setup_instructions_win.md"
   "$ROOT_DIR/scripts/apply_repo_agent_policy.sh"
   "$ROOT_DIR/scripts/apply_repo_agent_policy.ps1"
+  "$ROOT_DIR/scripts/obsidian_index_refresh.sh"
+  "$ROOT_DIR/scripts/obsidian_fast_context.sh"
+  "$ROOT_DIR/scripts/benchmark_obsidian_fast_context.sh"
+  "$ROOT_DIR/obsidian/agents-config-index.base"
+  "$ROOT_DIR/obsidian/agents-config-flow.canvas"
+  "$ROOT_DIR/obsidian/obsidian-cli-playbook.md"
   "$ROOT_DIR/templates/global/AGENTS.md.template"
   "$ROOT_DIR/templates/global/AGENT_NOTES_GLOBAL.md.template"
   "$ROOT_DIR/templates/repo/AGENTS.md.template"
@@ -23,7 +29,23 @@ for f in "${required_files[@]}"; do
   fi
 done
 
+brain_required_files=(
+  "$ROOT_DIR/AGENTS.md"
+  "$ROOT_DIR/templates/global/AGENTS.md.template"
+  "$ROOT_DIR/templates/repo/AGENTS.md.template"
+  "$ROOT_DIR/obsidian/obsidian-cli-playbook.md"
+)
+for f in "${brain_required_files[@]}"; do
+  if ! grep -Fq "the brain" "$f"; then
+    echo "Missing canonical 'the brain' mapping in $f" >&2
+    exit 1
+  fi
+done
+
 bash -n "$ROOT_DIR/scripts/apply_repo_agent_policy.sh"
+bash -n "$ROOT_DIR/scripts/obsidian_index_refresh.sh"
+bash -n "$ROOT_DIR/scripts/obsidian_fast_context.sh"
+bash -n "$ROOT_DIR/scripts/benchmark_obsidian_fast_context.sh"
 
 required_tokens=(
   "AGENT_NOTES*.md"
@@ -34,6 +56,11 @@ required_tokens=(
   "last_global_config_review_repo"
   "read-only"
   "Review guidelines"
+  "Obsidian CLI"
+  "obsidian_fast_context.sh"
+  "obsidian_index_refresh.sh"
+  "deprecated"
+  "the brain"
 )
 
 for doc in "$ROOT_DIR/setup_instructions.md" "$ROOT_DIR/setup_instructions_ubuntu.md" "$ROOT_DIR/setup_instructions_win.md"; do

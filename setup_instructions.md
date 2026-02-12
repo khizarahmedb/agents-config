@@ -36,6 +36,11 @@ Set these values first:
 - `GLOBAL_NOTES_PATH`: `<WORKSPACE_ROOT>/AGENT_NOTES_GLOBAL.md`
 - `TARGET_REPO`: repository currently being configured
 
+Canonical term mapping for this setup:
+- when the user says `the brain`, it means the maintained canonical config system:
+  - local: `<WORKSPACE_ROOT>/agents-config`
+  - remote: `https://github.com/khizarahmedb/agents-config`
+
 ## 2.1) Fast Path (Token-Efficient Bootstrap)
 
 Use the automation script for faster and more consistent setup:
@@ -49,6 +54,44 @@ bash <LOCAL_CONFIG_REPO_PATH>/scripts/apply_repo_agent_policy.sh \
 This script renders repo files from canonical templates in `<LOCAL_CONFIG_REPO_PATH>/templates/repo`.
 
 Then continue with daily sync + cross-tool mapping sections in this file.
+
+## 2.2) Obsidian-First Retrieval Bootstrap (Required)
+
+Legacy markdown-only retrieval flow is deprecated for this setup profile.
+
+Run this immediately after `2.1`:
+
+```bash
+if ! command -v obsidian >/dev/null 2>&1; then
+  if command -v brew >/dev/null 2>&1; then
+    brew install --cask obsidian || true
+  fi
+fi
+
+if ! command -v obsidian >/dev/null 2>&1; then
+  echo "ERROR: Obsidian CLI is required. Install/enable it via https://help.obsidian.md/cli and re-run setup." >&2
+  exit 1
+fi
+```
+
+Then seed fast retrieval:
+
+```bash
+bash <LOCAL_CONFIG_REPO_PATH>/scripts/obsidian_index_refresh.sh \
+  --repo-root <LOCAL_CONFIG_REPO_PATH> \
+  --vault <WORKSPACE_ROOT> \
+  --force-full
+```
+
+```bash
+bash <LOCAL_CONFIG_REPO_PATH>/scripts/obsidian_fast_context.sh \
+  --repo-root <LOCAL_CONFIG_REPO_PATH> \
+  --vault <WORKSPACE_ROOT> \
+  --query "Global Agent Instructions" \
+  --engine hybrid \
+  --refresh auto \
+  --mode paths
+```
 
 ## 3) Required End State
 
@@ -70,6 +113,10 @@ After setup:
 7. Cross-tool instruction discovery points to the same canonical global instruction source where supported.
 8. Bootstrap script exists and is idempotent for repeated runs.
 9. Canonical templates exist in `<LOCAL_CONFIG_REPO_PATH>/templates/global` and `<LOCAL_CONFIG_REPO_PATH>/templates/repo`.
+10. Obsidian-first retrieval scripts are present and executable:
+   - `<LOCAL_CONFIG_REPO_PATH>/scripts/obsidian_index_refresh.sh`
+   - `<LOCAL_CONFIG_REPO_PATH>/scripts/obsidian_fast_context.sh`
+11. Obsidian Base/Canvas/playbook files are present in `<LOCAL_CONFIG_REPO_PATH>/obsidian/`.
 
 ## 4) Daily Sync Routine (Run at Start of Conversation)
 
@@ -374,6 +421,8 @@ Notes:
 11. Automation script can be run repeatedly without duplicating entries or breaking tracked files.
 12. Template files in `<LOCAL_CONFIG_REPO_PATH>/templates/` exist and match intended policy.
 13. `bash <LOCAL_CONFIG_REPO_PATH>/scripts/validate_setup_consistency.sh` passes.
+14. `obsidian` CLI is available and `obsidian_fast_context.sh` returns paths for a sample query.
+15. `obsidian_index_refresh.sh` updates cache index without error.
 
 ## 10) Final Output Format (for the executing AI)
 
@@ -404,6 +453,9 @@ This setup incorporates the following validated patterns:
 - [OpenAI Codex guide: AGENTS.md](https://developers.openai.com/codex/guides/agents-md/)
 - [OpenAI Codex GitHub integration](https://developers.openai.com/codex/integrations/github/)
 - [OpenAI Codex config: project instructions discovery](https://developers.openai.com/codex/config-advanced/#project-instructions-discovery)
+- [Obsidian CLI](https://help.obsidian.md/cli)
+- [Obsidian Bases](https://help.obsidian.md/bases)
+- [Obsidian Search](https://help.obsidian.md/search)
 - [Vercel evals: AGENTS.md outperforms skills](https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals)
 - [Vercel: We removed 80% of our agent's tools](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools)
 - [Anthropic Claude Code memory hierarchy](https://code.claude.com/docs/en/memory)

@@ -104,9 +104,16 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 - For deterministic updates, change `templates/` first, then setup docs/scripts, then run validation scripts before push.
 - Codex GitHub review behavior reference: https://developers.openai.com/codex/integrations/github/
 
+## Independence
+
+- `agents-config` is standalone and does not require `my-opencode-conf`.
+- `my-opencode-conf` may be used as a separate standalone opencode-serving setup.
+- Keep both repositories independently installable and documented.
+
 ## Updates
 
 - 2026-02-10 | Added copy-paste-first setup guidance and runtime profile recommendations | Why: make onboarding deterministic across agent harnesses | Commit: `5259ef9`
 - 2026-02-10 | Added idempotent bootstrap automation scripts (`.sh` + `.ps1`) and fast-path docs | Why: reduce setup drift, steps, and token usage | Commit: `1932bb0`
 - 2026-02-10 | Added behavioral adaptation loop and token-efficiency protocol to setup docs | Why: improve iterative alignment and context efficiency | Commit: `8053028`
 - 2026-02-10 | Hardened setup docs and local ignore defaults (`AGENT*.md`, `.agentsmd`) | Why: keep local agent memory private and standardized | Commit: `16754e9`
+- 2026-02-16 | Added explicit repo-independence note for `agents-config` and `my-opencode-conf` | Why: prevent accidental coupling between separate setup paths | Commit: `pending`

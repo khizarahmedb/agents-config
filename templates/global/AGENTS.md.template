@@ -10,9 +10,6 @@ These instructions apply to repositories under `{{WORKSPACE_ROOT}}`.
 - Canonical repo notes file: `<repo_root>/AGENT_NOTES.md`
 - Optional repo skills index: `<repo_root>/skills.md`
 - Canonical remote reference repo (read-only for consumers): `https://github.com/khizarahmedb/agents-config`
-- Canonical term mapping: when users say `the brain`, interpret it as the canonical config system:
-  - Remote: `https://github.com/khizarahmedb/agents-config`
-  - Local: `{{WORKSPACE_ROOT}}/agents-config`
 
 ## Instruction Precedence
 1. Explicit user request in the current conversation.

@@ -11,6 +11,17 @@
 9. When repo-level notes are insufficient, consult `{{WORKSPACE_ROOT}}/AGENT_NOTES_GLOBAL.md`.
 10. Do not copy global notes into local notes unless explicitly requested; reference them instead.
 
+## Grounded Checks (Required)
+
+Use Grounded as the default guardrail for AI-generated changes in this repository.
+
+Before finalizing code changes:
+1. Run `grounded check`.
+2. If verdict is `BLOCK`, fix issues before commit/PR.
+3. If verdict is `REVIEW`, call out findings and risk in your response.
+
+Prefer project memory from `project-memory/` when planning and implementing changes.
+
 ## Review guidelines
 
 Use these for GitHub PR reviews (for example with `@codex review`):

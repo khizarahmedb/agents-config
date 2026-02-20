@@ -41,6 +41,7 @@ Recommended runtime profile:
 - Compact docs-index + retrieval-led workflow to reduce token/context bloat
 - Explicit behavioral adaptation loop (feedback -> note update -> immediate application)
 - Repo `AGENTS.md` template includes mandatory `## Review guidelines` for `@codex review`
+- Grounded integration path for deterministic AI code checks (`PASS/REVIEW/BLOCK`)
 
 ## Automation Layer
 
@@ -49,6 +50,8 @@ The project includes idempotent bootstrap scripts for faster setup in new reposi
 Files:
 - `scripts/apply_repo_agent_policy.sh` (macOS/Linux)
 - `scripts/apply_repo_agent_policy.ps1` (Windows PowerShell)
+- `scripts/install_grounded.sh` (macOS/Linux)
+- `scripts/install_grounded.ps1` (Windows PowerShell)
 - `scripts/validate_setup_consistency.sh` (macOS/Linux validation)
 - `scripts/validate_setup_consistency.ps1` (Windows validation)
 
@@ -56,6 +59,23 @@ These scripts:
 - ensure `.gitignore` contains `/docs/`, `AGENT_NOTES*.md`, `.agentsmd`
 - create repo `AGENTS.md` and `AGENT_NOTES.md` if missing
 - keep `AGENTS.md` tracked and untrack already-tracked `AGENT_NOTES*.md`/`.agentsmd` files without deleting local copies
+- optionally apply Grounded checks to each repository (`--with-grounded`)
+
+Grounded global install (macOS/Linux):
+
+```bash
+# pulls from https://github.com/flow-grammer/grounded
+bash ./scripts/install_grounded.sh --scope global --agents all --with-global-git-template
+git config --global init.templatedir ~/.git-templates
+```
+
+Grounded global install (Windows):
+
+```powershell
+# pulls from https://github.com/flow-grammer/grounded
+powershell -ExecutionPolicy Bypass -File .\scripts\install_grounded.ps1 -Scope global -Agents all -WithGlobalGitTemplate
+git config --global init.templatedir $HOME\.git-templates
+```
 
 macOS/Linux usage:
 
@@ -92,6 +112,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\validate_setup_consistency.ps
 - `setup_instructions_win.md`: Windows-specific profile
 - `scripts/apply_repo_agent_policy.sh`: Unix bootstrap automation
 - `scripts/apply_repo_agent_policy.ps1`: Windows bootstrap automation
+- `scripts/install_grounded.sh`: Unix Grounded installer wrapper
+- `scripts/install_grounded.ps1`: Windows Grounded installer wrapper
 - `scripts/validate_setup_consistency.sh`: Unix setup consistency checks
 - `scripts/validate_setup_consistency.ps1`: Windows setup consistency checks
 - `templates/global/`: canonical global AGENTS/notes templates

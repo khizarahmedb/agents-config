@@ -131,6 +131,15 @@ Use `AGENTS.md` as single source of truth, then expose it through each tool's gl
 - Copilot CLI: `~/.copilot/copilot-instructions.md` (or `AGENTS.md` via `COPILOT_CUSTOM_INSTRUCTIONS_DIRS`)
 - Cursor: `AGENTS.md` in repo root/subdirectories can coexist with `.cursor/rules`
 
+## Grounded Enforcement (Recommended Default)
+For deterministic AI code checks across tools:
+1. Install Grounded once globally:
+   - `bash {{WORKSPACE_ROOT}}/agents-config/scripts/install_grounded.sh --scope global --agents all --with-global-git-template`
+   - Installer pulls from `https://github.com/flow-grammer/grounded`.
+2. In each repository, apply repo-level enforcement:
+   - `bash {{WORKSPACE_ROOT}}/agents-config/scripts/apply_repo_agent_policy.sh --workspace-root {{WORKSPACE_ROOT}} --repo-root <repo> --with-grounded`
+3. Keep agent instructions concise and rely on Grounded for `PASS/REVIEW/BLOCK` checks.
+
 Bootstrap script:
 - Run `{{WORKSPACE_ROOT}}/setup-agent-standards.sh` to wire tool-specific global files to this canonical global `AGENTS.md`.
 

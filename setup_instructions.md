@@ -50,6 +50,25 @@ This script renders repo files from canonical templates in `<LOCAL_CONFIG_REPO_P
 
 Then continue with daily sync + cross-tool mapping sections in this file.
 
+## 2.2) Grounded Guardrail (Recommended Default)
+
+Install Grounded once globally:
+
+```bash
+# or manually: pipx install --force "git+https://github.com/flow-grammer/grounded.git"
+bash <LOCAL_CONFIG_REPO_PATH>/scripts/install_grounded.sh --scope global --agents all --with-global-git-template
+git config --global init.templatedir ~/.git-templates
+```
+
+When applying policy to a repository, include Grounded setup:
+
+```bash
+bash <LOCAL_CONFIG_REPO_PATH>/scripts/apply_repo_agent_policy.sh \
+  --workspace-root <WORKSPACE_ROOT> \
+  --repo-root <TARGET_REPO> \
+  --with-grounded
+```
+
 ## 3) Required End State
 
 After setup:
@@ -70,6 +89,7 @@ After setup:
 7. Cross-tool instruction discovery points to the same canonical global instruction source where supported.
 8. Bootstrap script exists and is idempotent for repeated runs.
 9. Canonical templates exist in `<LOCAL_CONFIG_REPO_PATH>/templates/global` and `<LOCAL_CONFIG_REPO_PATH>/templates/repo`.
+10. Grounded checks are available for AI coding workflows (`grounded check`, `PASS/REVIEW/BLOCK`).
 
 ## 4) Daily Sync Routine (Run at Start of Conversation)
 

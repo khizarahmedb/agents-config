@@ -4,18 +4,20 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  apply_repo_agent_policy.sh --workspace-root <path> --repo-root <path>
+  apply_repo_agent_policy.sh --workspace-root <path> --repo-root <path> [--with-grounded]
 
 Description:
   Idempotently applies local AGENTS policy to a repository:
   - Ensures .gitignore contains /docs/, AGENT_NOTES*.md, .agentsmd
   - Creates AGENTS.md and AGENT_NOTES.md if missing
   - Untracks already-tracked AGENT_NOTES*.md/.agentsmd files
+  - Optionally installs Grounded repo checks when available
 USAGE
 }
 
 WORKSPACE_ROOT=""
 REPO_ROOT=""
+WITH_GROUNDED="false"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_REPO_AGENTS="$SCRIPT_DIR/../templates/repo/AGENTS.md.template"
 TEMPLATE_REPO_NOTES="$SCRIPT_DIR/../templates/repo/AGENT_NOTES.md.template"
@@ -29,6 +31,10 @@ while [[ $# -gt 0 ]]; do
     --repo-root)
       REPO_ROOT="$2"
       shift 2
+      ;;
+    --with-grounded)
+      WITH_GROUNDED="true"
+      shift
       ;;
     -h|--help)
       usage
@@ -108,3 +114,13 @@ echo "Applied policy to: $REPO_ROOT"
 echo "- ensured .gitignore: /docs/, AGENT_NOTES*.md, .agentsmd"
 echo "- ensured AGENTS.md and AGENT_NOTES.md exist"
 echo "- untracked AGENT_NOTES*.md/.agentsmd where previously tracked"
+
+if [[ "$WITH_GROUNDED" == "true" ]]; then
+  if command -v grounded >/dev/null 2>&1; then
+    grounded init --path "$REPO_ROOT" >/dev/null 2>&1 || true
+    grounded install --scope repo --path "$REPO_ROOT" --agents all >/dev/null 2>&1 || true
+    echo "- grounded repo checks installed (or already present)"
+  else
+    echo "- grounded command not found; skipped grounded repo install"
+  fi
+fi

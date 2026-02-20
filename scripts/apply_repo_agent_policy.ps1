@@ -3,7 +3,9 @@ param(
   [string]$WorkspaceRoot,
 
   [Parameter(Mandatory = $true)]
-  [string]$RepoRoot
+  [string]$RepoRoot,
+
+  [switch]$WithGrounded
 )
 
 Set-StrictMode -Version Latest
@@ -91,3 +93,14 @@ Write-Host "Applied policy to: $RepoRoot"
 Write-Host "- ensured .gitignore: /docs/, AGENT_NOTES*.md, .agentsmd"
 Write-Host "- ensured AGENTS.md and AGENT_NOTES.md exist"
 Write-Host "- untracked AGENT_NOTES*.md/.agentsmd where previously tracked"
+
+if ($WithGrounded) {
+  $grounded = Get-Command grounded -ErrorAction SilentlyContinue
+  if ($null -ne $grounded) {
+    grounded init --path "$RepoRoot" *> $null
+    grounded install --scope repo --path "$RepoRoot" --agents all *> $null
+    Write-Host "- grounded repo checks installed (or already present)"
+  } else {
+    Write-Host "- grounded command not found; skipped grounded repo install"
+  }
+}
